@@ -6,20 +6,37 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>8e52e538-a08a-49a1-b3f6-145fb2d72203</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <!-- Disable publishing of a web.config file for IIS when calling dotnet publish. -->
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
   </PropertyGroup>
 
+  <PropertyGroup Label="Package">
+    <Authors>Project Author</Authors>
+    <Company>Project Author</Company>
+    <Description>Project Description</Description>
+    <Copyright>Copyright © Project Author. All rights Reserved</Copyright>
+  </PropertyGroup>
+  
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Boxed.AspNetCore" Version="9.0.1" />
+    <PackageReference Include="Boxed.AspNetCore.Swagger" Version="10.0.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

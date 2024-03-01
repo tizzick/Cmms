@@ -2,10 +2,12 @@ namespace Cmms.Api.Assets;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using Boxed.AspNetCore;
 //using System.Net.Mime;
 //using System.Collections.ObjectModel;
 using Cmms.Api.Common.Constants;
 using Cmms.Api.Common.ViewModels;
+using Swashbuckle.AspNetCore.Annotations;
 
 /// <summary>
 /// The assets controller
@@ -13,6 +15,13 @@ using Cmms.Api.Common.ViewModels;
 [Route("[controller]")]
 [ApiController]
 [ApiVersion(ApiVersionName.V1)]
+[SwaggerResponse(
+    StatusCodes.Status500InternalServerError,
+    "The MIME type in the Accept HTTP header is not acceptable.",
+    typeof(ProblemDetails),
+    ContentType.ProblemJson)]
+#pragma warning disable CA1822 // Mark members as static
+#pragma warning disable CA1062 // Validate arguments of public methods
 public class AssetController : ControllerBase
 {
 
@@ -21,6 +30,7 @@ public class AssetController : ControllerBase
     /// </summary>
     /// <returns>A 200 OK response.</returns>
     [HttpOptions(Name = AssetsControllerRoute.OptionsAssets)]
+    [SwaggerResponse(StatusCodes.Status200OK, "The allowed HTTP methods.")]
     public IActionResult Options()
     {
         this.HttpContext.Response.Headers.AppendCommaSeparatedValues(

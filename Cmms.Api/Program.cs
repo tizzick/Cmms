@@ -1,34 +1,82 @@
-using Cmms.Api.Assets;
-using FluentValidation;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+namespace Cmms.Api;
 
-var builder = WebApplication.CreateBuilder(args);
+//using Cmms.Api.Assets;
+using Cmms.Api.Common.Options;
+//using FluentValidation;
+//using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-// Add services to the container.
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-// Add useful interface for accessing the ActionContext outside a controller.
-builder.Services.AddHttpContextAccessor()
-    .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-    .AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Singleton)
-    .AddControllers(x => x.ModelValidatorProviders.Clear());
-
-builder.Services.AddAssetServices();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+/// <summary>
+/// 
+/// </summary>
+public class Program
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    public static async Task<int> Main(string[] args)
+    {
+        IHost? host = null;
+        try
+        {
+            host = CreateHostBuilder(args).Build();
+
+            host.LogApplicationStarted();
+            await host.RunAsync().ConfigureAwait(false);
+            host.LogApplicationStopped();
+
+            return 0;
+        }
+#pragma warning disable CA1031 // Do not catch general exception types
+        catch (Exception exception)
+#pragma warning restore CA1031 // Do not catch general exception types
+        {
+            host!.LogApplicationTerminatedUnexpectedly(exception);
+
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        new HostBuilder()
+            .UseContentRoot(Directory.GetCurrentDirectory())
+            .ConfigureHostConfiguration(
+                configurationBuilder => configurationBuilder.AddCustomBootstrapConfiguration(args))
+            .ConfigureAppConfiguration(
+                (hostingContext, configurationBuilder) =>
+                {
+                    hostingContext.HostingEnvironment.ApplicationName = AssemblyInformation.Current.Product;
+                    configurationBuilder.AddCustomConfiguration(hostingContext.HostingEnvironment, args);
+                })
+            .UseDefaultServiceProvider(
+                (context, options) =>
+                {
+                    var isDevelopment = context.HostingEnvironment.IsDevelopment();
+                    options.ValidateScopes = isDevelopment;
+                    options.ValidateOnBuild = isDevelopment;
+                })
+            .ConfigureWebHost(ConfigureWebHostBuilder)
+            .UseConsoleLifetime();
+
+    private static void ConfigureWebHostBuilder(IWebHostBuilder webHostBuilder) =>
+        webHostBuilder
+            .UseKestrel(
+                (builderContext, options) =>
+                {
+                    options.AddServerHeader = false;
+                    options.Configure(
+                        builderContext.Configuration.GetRequiredSection(nameof(ApplicationOptions.Kestrel)),
+                        reloadOnChange: false);
+                })
+            // Used for IIS and IIS Express for in-process hosting. Use UseIISIntegration for out-of-process hosting.
+            .UseIIS()
+            .UseStartup<Startup>();
 }
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.Run();
